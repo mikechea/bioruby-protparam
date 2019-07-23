@@ -376,7 +376,7 @@ module Bio
   end
 
   module Remote
-    PROTPARAM_URL = 'http://web.expasy.org/cgi-bin/protparam/protparam'
+    PROTPARAM_URL = 'https://web.expasy.org/cgi-bin/protparam/protparam'
 
     attr_accessor :result
 
@@ -447,6 +447,7 @@ module Bio
     rule :num_neg, Fixnum, %r/<B>Total number of negatively charged residues.*?<\/B>\s*(\d*)/
     rule :num_pos, Fixnum, %r/<B>Total number of positively charged residues.*?<\/B>\s*(\d*)/
     rule :amino_acid_number, Fixnum, %r/<B>Number of amino acids:<\/B> (\d+)/
+    rule :extinction_coefficient, Float, %r{Abs 0.1% \(=1 g\/l\)   (\d.\d+), assuming all pairs of Cys residues form cystines}
     rule :total_atoms, Fixnum, %r/<B>Total number of atoms:<\/B>\s*(\d*)/
     rule :num_carbon, Fixnum, %r/Carbon\s+C\s+(\d+)/
     rule :num_hydrogen, Fixnum, %r/Hydrogen\s+H\s+(\d+)/
@@ -496,9 +497,8 @@ module Bio
 
     def request
       @result ||= begin
-                    res = Net::HTTP.post_form(URI(PROTPARAM_URL),
-                                              {'sequence' => @seq.to_s})
-                    res.body
+                    res = Net::HTTP.get(URI(PROTPARAM_URL + "?sequence=#{@seq}"))
+                    res
                   end
     end
 
